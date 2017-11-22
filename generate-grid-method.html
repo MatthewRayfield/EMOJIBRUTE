@@ -1,0 +1,138 @@
+<div id="count"></div>
+<script src="download2.js"></script>
+<script>
+    var canvasA = document.createElement('canvas'),
+        contextA = canvasA.getContext('2d'),
+        canvasB = document.createElement('canvas'),
+        contextB = canvasB.getContext('2d'),
+        canvasC = document.createElement('canvas'),
+        contextC = canvasC.getContext('2d'),
+        dataA,
+        dataB,
+        width,
+        height,
+        image,
+        currentDiff,
+        total = 0,
+        count = 0,
+        span = document.getElementById('count'),
+        frame = 0;
+
+    function calculateDifference() {
+        var diff = 0,
+            i;
+
+        dataB = contextB.getImageData(0, 0, width, height).data;
+
+        for (i = 0; i < dataA.length; i += 4) {
+            //diff += Math.abs(dataB[i] - dataA[i]);
+            diff += Math.sqrt(
+                Math.pow(dataB[i+0] - dataA[i+0], 2) +
+                Math.pow(dataB[i+1] - dataA[i+1], 2) +
+                Math.pow(dataB[i+2] - dataA[i+2], 2)
+            );
+        }
+
+        return diff;
+    }
+
+    function rand(min, max) {
+        return Math.floor(Math.random()*(max-min)) + min;
+    }
+
+    var size = 20;
+    var x = 0, y = 0;
+    function loop() {
+        var newDiff,
+            bestDiff,
+            bestEmoji,
+            i = 1;
+
+        function next() {
+            var emojiImage = new Image();
+
+            emojiImage.addEventListener('load', function () {
+                contextB.clearRect(0, 0, width, height);
+                contextB.drawImage(canvasC, 0, 0);
+
+                contextB.drawImage(emojiImage, x, y);
+
+                newDiff = calculateDifference();
+
+                if (bestDiff == undefined || newDiff < bestDiff) {
+                    bestEmoji = i;
+                    bestDiff = newDiff;
+                }
+
+                span.innerHTML = i;
+
+                i ++;
+                if (i <= 2174) {
+                    setTimeout(next, 0);
+                }
+                else {
+                    emojiImage = new Image();
+                    emojiImage.addEventListener('load', function () {
+                        contextC.drawImage(emojiImage, x, y);
+
+                        x += size;
+                        if (x > width) {
+                            x = 0;
+                            y += size;
+
+                            if (y > height) {
+                                console.log('done!');
+                            }
+                            else {
+                                setTimeout(loop, 0);
+                            }
+                        }
+                        else {
+                            setTimeout(loop, 0);
+                        }
+                    });
+                    emojiImage.src = 'images/'+size+'x'+size+'/'+bestEmoji+'.png';
+                }
+            });
+
+            emojiImage.src = 'images/'+size+'x'+size+'/'+i+'.png';
+        }
+        next();
+    }
+
+    function loadNextFrame() {
+        image = new Image();
+        image.addEventListener('load', function () {
+            var r, g, b, x, y;
+
+            width = image.width;
+            height = image.height;
+
+            canvasA.width = width;
+            canvasA.height = height;
+            contextA.drawImage(image, 0, 0);
+
+            canvasB.width = width;
+            canvasB.height = height;
+
+            canvasC.width = width;
+            canvasC.height = height;
+            contextC.drawImage(canvasB, 0, 0);
+
+            dataA = contextA.getImageData(0, 0, width, height).data;
+
+            currentDiff = calculateDifference();
+            loop();
+        });
+
+        image.src = 'me.png';
+    }
+
+    window.addEventListener('load', function () {
+        document.body.appendChild(canvasA);
+        document.body.appendChild(canvasB);
+        document.body.appendChild(canvasC);
+
+        loadNextFrame();
+    });
+</script>
