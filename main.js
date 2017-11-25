@@ -8,12 +8,15 @@ var canvasA = document.createElement('canvas'),
     dataB,
     width,
     height,
-    image = new Image(),
+    image,
     currentDiff,
     total = 0,
     count = 0,
     controlsBox,
+    iconsSelect,
+    timelapseCheckbox,
     statusDisplay,
+    startButton,
     startTime;
 
 function calculateDifference() {
@@ -47,11 +50,10 @@ function loop() {
         newDiff,
         a;
 
-    size = ['20x20', '32x32', '64x64'][rand(0, 3)];
     var emojiImage = new Image();
 
     emojiImage.addEventListener('load', function () {
-        var minutes;
+        var minutes, a;
 
         contextB.drawImage(emojiImage, rand(-64, width), rand(-64, height));
 
@@ -63,10 +65,12 @@ function loop() {
 
             count ++;
 
-            /*a = document.createElement('a');
-            a.download = 'emoji-' + ('00000'+count).substr(-5) + '.png';
-            a.href = canvasB.toDataURL('image/png');
-            a.click();*/
+            if (timelapseCheckbox.checked) {
+                a = document.createElement('a');
+                a.download = 'emojibrute-' + ('00000'+count).substr(-5) + '.png';
+                a.href = canvasB.toDataURL('image/png');
+                a.click();
+            }
         }
         else {
             contextB.drawImage(canvasC, 0, 0);
@@ -80,10 +84,23 @@ function loop() {
         setTimeout(loop, 0);
     });
 
-    emojiImage.src = 'images/'+size+'/'+rand(1, 2175)+'.png';
+    switch (iconsSelect.value) {
+        case 'all-emoji':
+            size = ['20x20', '32x32', '64x64'][rand(0, 3)];
+            emojiImage.src = 'images/'+size+'/'+rand(1, 2175)+'.png';
+            break;
+        case 'small-emoji':
+            emojiImage.src = 'images/20x20/'+rand(1, 2175)+'.png';
+            break;
+        case 'pokemon':
+            emojiImage.src = 'pokemon/'+rand(1, 151)+'.png';
+            break;
+    }
 }
 
-function initialize(image) {
+function start() {
+    controlsBox.style.display = 'none';
+
     width = image.width;
     height = image.height;
 
@@ -110,17 +127,19 @@ window.addEventListener('load', function () {
     var fileInput = document.getElementById('file');
 
     controlsBox = document.getElementById('controls');
+    iconsSelect = document.getElementById('icons');
+    timelapseCheckbox = document.getElementById('timelapse');
     statusDisplay = document.getElementById('status');
+    startButton = document.getElementById('start');
 
     fileInput.addEventListener('change', function(event) {
         var reader = new FileReader();
 
         reader.addEventListener('load', function (event) {
-            var image = new Image();
+            image = new Image();
 
             image.addEventListener('load', function () {
-                controlsBox.style.display = 'none';
-                initialize(image);
+                startButton.style.display = 'inline';
             });
 
             image.src = event.target.result;
@@ -130,6 +149,14 @@ window.addEventListener('load', function () {
             reader.readAsDataURL(fileInput.files[0]);
         }
     });
+
+    timelapseCheckbox.addEventListener('change', function () {
+        if (timelapseCheckbox.checked) {
+            alert('WARNING! Timelapse will download a gazillion images automatically. Prepare yourself.');
+        }
+    });
+
+    startButton.addEventListener('click', start);
 
     document.body.appendChild(canvasA);
     document.body.appendChild(canvasC);

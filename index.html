@@ -10,8 +10,15 @@
             .flip {
                 transform: scaleX(-1);
             }
+            #controls {
+                display: inline-block;
+            }
             #status {
                 margin-bottom: 1rem;
+            }
+            #start {
+                width: 100%;
+                display: none;
             }
         </style>
     </head>
@@ -19,6 +26,17 @@
         <h1><img src="images/32x32/1720.png" /><br /><img src="images/32x32/1414.png" />EMOJIBRUTE<img src="images/32x32/1414.png" class="flip" /></h1>
         <div id="controls">
             <input type="file" id="file" />
+            <label for="icons">icons: </label>
+            <select id="icons">
+                <option value="all-emoji">all emoji</option>
+                <option value="small-emoji">small emoji</option>
+                <option value="pokemon">pokemon</option>
+            </select>
+            <label for="timelapse">timelapse: </label>
+            <input type="checkbox" id="timelapse" />
+            <br />
+            <br />
+            <button id="start">start</button>
         </div>
         <div id="status"></div>
     </body>
